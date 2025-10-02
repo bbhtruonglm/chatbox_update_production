@@ -6,6 +6,7 @@
     @click="clickBtnOpenQuickAnswer"
     class="text-slate-400 w-5 h-5 cursor-pointer my-1.5 flex-shrink-0"
   />
+
   <Teleport
     to="body"
     v-if="commonStore.is_show_quick_answer"
@@ -39,6 +40,23 @@
               @click="$external_site.openPageSetting('quick-reply')"
               class="w-6 h-6 text-black cursor-pointer"
             />
+            <button
+              v-tooltip="$t('Lấy danh sách trả lời nhanh từ trang khác')"
+              @click="modal_change_quick_answer_ref?.toggleModal"
+            >
+              <ChangeIcon
+                v-if="
+                  page_id === conversationStore.select_conversation?.fb_page_id
+                "
+                class="size-4 text-black m-0.5"
+                
+              />
+              <PageAvatar
+                v-else
+                :page_info="orgStore.list_os?.find((item) => item.page_id === page_id)?.page_info"
+                class="size-5"
+              />
+            </button>
           </div>
         </div>
         <div class="overflow-y-auto flex flex-col py-2 gap-2">
@@ -78,36 +96,47 @@
       </div>
     </div>
   </Teleport>
+
+  <ModalChangeQuickAnswer
+    ref="modal_change_quick_answer_ref"
+    v-model:page_id="page_id"
+    v-on:update:page_id="onChangePageId"
+  />
 </template>
 <script setup lang="ts">
-import { computed, inject, nextTick, onMounted, onUnmounted, ref } from 'vue'
-import {
-  useConversationStore,
-  useMessageStore,
-  useCommonStore,
-  useOrgStore,
-} from '@/stores'
-import { nonAccentVn } from '@/service/helper/format'
-import { last, size, sortBy } from 'lodash'
-import { IS_VISIBLE_SEND_BTN_FUNCT } from '@/views/ChatWarper/Chat/CenterContent/InputChat/symbol'
-import { useI18n } from 'vue-i18n'
+import { gen_answer, text_translate } from '@/service/api/chatbox/ai'
 import { getPageInfo, getStaffInfo } from '@/service/function'
 import { toastError } from '@/service/helper/alert'
-import { gen_answer, text_translate } from '@/service/api/chatbox/ai'
+import { nonAccentVn } from '@/service/helper/format'
+import { getItem, setItem } from '@/service/helper/localStorage'
+import {
+  useCommonStore,
+  useConversationStore,
+  useMessageStore,
+  useOrgStore,
+} from '@/stores'
 import { QuickAnswer } from '@/utils/api/Widget'
-import { container } from 'tsyringe'
 import { ExternalSite } from '@/utils/helper/ExternalSite'
 import { composableService as inputComposableService } from '@/views/ChatWarper/Chat/CenterContent/InputChat/MainInput/service'
+import { IS_VISIBLE_SEND_BTN_FUNCT } from '@/views/ChatWarper/Chat/CenterContent/InputChat/symbol'
+import { format } from 'date-fns'
+import { last, size, sortBy } from 'lodash'
+import { container } from 'tsyringe'
+import { computed, inject, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
+import PageAvatar from '@/components/Avatar/PageAvatar.vue'
 import Loading from '@/components/Loading.vue'
+import ModalChangeQuickAnswer from '@/views/ChatWarper/Chat/CenterContent/InputChat/MainInput/ModalChangeQuickAnswer.vue'
 
-import SlashQuareIcon from '@/components/Icons/SlashQuare.vue'
 import AiBoldIcon from '@/components/Icons/AiBold.vue'
-import TextIcon from '@/components/Icons/Text.vue'
+import ChangeIcon from '@/components/Icons/ChangeIcon.vue'
 import CogIcon from '@/components/Icons/Cog.vue'
+import SlashQuareIcon from '@/components/Icons/SlashQuare.vue'
+import TextIcon from '@/components/Icons/Text.vue'
 
-import type { QuickAnswerInfo } from '@/service/interface/app/message'
 import type { SourceChat } from '@/service/interface/app/ai'
+import type { QuickAnswerInfo } from '@/service/interface/app/message'
 import type { WidgetEventData } from '@/service/interface/app/widget'
 
 const { InputService } = inputComposableService()
@@ -150,11 +179,13 @@ const is_loading = ref(false)
 const selected_answer_id = ref<string>('')
 /** Index của answer đang được chọn */
 const selected_answer_index = ref(0)
+/** modal thay đổi danh sách câu trả lời nhanh */
+const modal_change_quick_answer_ref = ref<InstanceType<
+  typeof ModalChangeQuickAnswer
+> | null>(null)
 
 /**id trang đang được chọn */
-const page_id = computed(
-  () => conversationStore.select_conversation?.fb_page_id
-)
+const page_id = ref<string>('')
 /**id khách đang được chọn */
 const client_id = computed(
   () => conversationStore.select_conversation?.fb_client_id
@@ -218,6 +249,13 @@ async function changeModalPosition() {
 /** Lấy dữ liệu trả lời nhanh */
 async function getQuickAnswer() {
   try {
+    // lấy page_id từ local
+    const PAGE_ID_MAP = getItem('quick_answer_page_id') || {}
+
+    page_id.value =
+      PAGE_ID_MAP?.[conversationStore.select_conversation?.fb_page_id || ''] ||
+      conversationStore.select_conversation?.fb_page_id
+
     // nếu không có id trang thì thôi
     if (!page_id.value) return
 
@@ -470,10 +508,30 @@ async function complete() {
   // đánh dấu AI đã chạy xong
   messageStore.is_input_run_ai = false
 }
+/** hàm xử lý thay đổi id page */
+function onChangePageId(id: string) {
+  if (!id || !conversationStore.select_conversation?.fb_page_id) return
+
+  // cập nhật id page
+  page_id.value = id
+
+  const PAGE_ID_MAP = getItem('quick_answer_page_id') || {}
+
+  setItem('quick_answer_page_id', {
+    ...PAGE_ID_MAP,
+    [conversationStore.select_conversation.fb_page_id]: id,
+  })
+
+  // lấy dữ liệu trả lời nhanh
+  getQuickAnswer()
+}
+
 /**thay thế template message thành data của conversation */
 function replaceTemplateMessage(content: string) {
   /**dữ liệu hội thoại đang được chọn */
   const CONVERSATION = conversationStore.select_conversation
+  /** id page của page hiện tại */
+  const PAGE_ID = CONVERSATION?.fb_page_id
 
   // loại bỏ các template chưa xử lý được
   content = content
@@ -481,22 +539,21 @@ function replaceTemplateMessage(content: string) {
     .replace(/#{{LAST_NAME}}/g, '')
     .replace(/#{{STAFF_FIRST_NAME}}/g, '')
     .replace(/#{{STAFF_LAST_NAME}}/g, '')
-    // .replace(/#SEX\{\{[^|}]+\|[^|}]+\|[^|}]+\}\}/g, '')
-    .replace(/#\{\{[^|}]+\|[^|}]+\|[^|}]+\}\}/g, '')
-    .replace(/#\{\{TODAY\{[^}]+\}\}\}/g, '')
+  // .replace(/#\{\{[^|}]+\|[^|}]+\|[^|}]+\}\}/g, '')
+  // .replace(/#\{\{TODAY\{[^}]+\}\}\}/g, '')
 
   /**tên khách hàng */
   const CLIENT_NAME =
     CONVERSATION?.client_origin_name || CONVERSATION?.client_name || ''
   /**tên nhân viên */
   const STAFF_NAME =
-    getStaffInfo(page_id.value, CONVERSATION?.fb_staff_id)?.name || ''
+    getStaffInfo(PAGE_ID, CONVERSATION?.fb_staff_id)?.name || ''
   /**số điện thoại khách hàng */
   const PHONE = CONVERSATION?.client_phone || ''
   /**email khách hàng */
   const EMAIL = CONVERSATION?.client_email || ''
   /**tên trang */
-  const PAGE_NAME = getPageInfo(page_id.value)?.name || ''
+  const PAGE_NAME = getPageInfo(PAGE_ID)?.name || ''
 
   return (
     content
@@ -529,6 +586,20 @@ function replaceTemplateMessage(content: string) {
       .replace(/#SEX\{[^|}]+\|[^|}]+\|[^|}]+\}/g, (_, male, female, unknown) =>
         getGender(CONVERSATION?.client_gender, male, female, unknown)
       )
+
+      // giá trị ngẫu nhiên
+      .replace(/#\{\{([^}|]+\|[^}]+)\}\}/g, (_, value) => getRandomValue(value))
+      .replace(/#\{([^}|]+\|[^}]+)\}/g, (_, value) => getRandomValue(value))
+
+      // thời gian
+      .replace(
+        /#\{\{(TODAY|YESTERDAY|TOMORROW)\{((?:DD|MM|YYYY|HH|mm)([/:])(?:DD|MM|YYYY|HH|mm)(?:\3(?:DD|MM|YYYY))?)\}\}\}/g,
+        (_, DATE, FORMAT) => formatTime(DATE, FORMAT)
+      )
+      .replace(
+        /#\{(TODAY|YESTERDAY|TOMORROW)\{((?:DD|MM|YYYY|HH|mm)([/:])(?:DD|MM|YYYY|HH|mm)(?:\3(?:DD|MM|YYYY))?)\}\}/g,
+        (_, DATE, FORMAT) => formatTime(DATE, FORMAT)
+      )
   )
 }
 
@@ -551,6 +622,45 @@ function getGender(
   if (gender === 'female') return female
   // nếu là không rõ giới tính
   return unknown
+}
+
+/** hàm lấy giá trị ngẫu nhiên */
+function getRandomValue(content: string) {
+  /** các giá trị  */
+  const OPTIONS = content.split('|')
+  /** tạo 1 chỉ số ngẫu nhiên */
+  const randomIndex = Math.floor(Math.random() * OPTIONS.length)
+  // trả về phần tử ngẫu nhiên
+  return OPTIONS[randomIndex]
+}
+
+/** hàm lấy ngày thời gian theo điều kiện */
+function formatTime(date: string, format_str: string) {
+  /** thời gian được hiển thị */
+  let time: Date
+  /** định dạng mong muốn */
+  let format_rule = ''
+
+  // tạo thời gian theo điều kiện
+  switch (date) {
+    case 'TODAY':
+      time = new Date()
+      break
+    case 'YESTERDAY':
+      time = new Date(new Date().setDate(new Date().getDate() - 1))
+      break
+    case 'TOMORROW':
+      time = new Date(new Date().setDate(new Date().getDate() + 1))
+      break
+    default:
+      time = new Date(date)
+  }
+
+  // lowercase DD và YYYY vẫn giữ MM
+  format_rule = format_str?.replace('DD', 'dd')
+  format_rule = format_rule?.replace('YYYY', 'yyyy')
+
+  return format(time, format_rule)
 }
 
 /**cuộn tới vị trí trả lời nhanh đang chọn */

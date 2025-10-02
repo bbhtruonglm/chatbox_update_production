@@ -14,7 +14,7 @@
       v-if="size(conversationStore.conversation_list)"
       class="overflow-y-auto"
       :items="map(conversationStore.conversation_list)"
-      :item-size="78"
+      :item-size="86"
       key-field="data_key"
       v-slot="{ item }"
     >
@@ -165,6 +165,9 @@ class Main {
     // nếu đang mất mạng thì không cho gọi api
     if (!commonStore.is_connected_internet) return
 
+    // nếu không có org_id thì thôi
+    if (!orgStore.selected_org_id) return
+
     /**danh sách id page */
     const PAGE_IDS = keys(pageStore.selected_page_id_list)
     /**cấu hình trang đặc biệt */
@@ -206,6 +209,7 @@ class Main {
       // lấy dữ liệu hội thoại
       res = await this.API_CONVERSATION.readConversations(
         PAGE_IDS,
+        orgStore.selected_org_id,
         {
           ...conversationStore.option_filter_page_data,
           ...OVERWRITE_FILTER,
@@ -659,9 +663,7 @@ onUnmounted(() => {
 // khi thay đổi giá trị lọc tin nhắn(trừ field conversation_type) thì load lại dữ liệu
 watch(
   () => option_filter_page_data.value,
-  (new_val, old_val) => {
-    console.log(new_val, old_val);
-    
+  (new_val, old_val) => {    
     $main.loadConversationFirstTime(true, true, true)
   },
   { deep: true }
