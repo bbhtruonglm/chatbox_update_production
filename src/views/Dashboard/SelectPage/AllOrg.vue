@@ -22,8 +22,8 @@
 </template>
 <script setup lang="ts">
 import { useOrgStore, usePageStore, useSelectPageStore } from '@/stores'
-import { omitBy, sortBy } from 'lodash'
-import { provide, ref } from 'vue'
+import { isEmpty, omitBy, sortBy } from 'lodash'
+import { nextTick, onMounted, provide, ref, watch } from 'vue'
 import { KEY_ADVANCE_SELECT_AGE_FUNCT } from './symbol'
 
 import Org from '@/views/Dashboard/SelectPage/AllOrg/Org.vue'
@@ -31,6 +31,7 @@ import EmptyPage from '@/views/Dashboard/SelectPage/EmptyPage.vue'
 import SkeletonGroupPage from '@/views/Dashboard/SkeletonGroupPage.vue'
 
 import type { PageData } from '@/service/interface/app/page'
+import { BillingAppGroup } from '@/utils/api/Billing'
 
 const selectPageStore = useSelectPageStore()
 const pageStore = usePageStore()
@@ -99,13 +100,71 @@ class Main {
   /** có hiện ui của tổ chức hay không */
   isVisibleOrg(org_id?: string) {
     /** nếu là chọn tất cả thì hiện */
+    console.log(orgStore.is_selected_all_org, ' hahah')
     if (orgStore.is_selected_all_org) return true
-
     // chọn 1 tố tổ chức thì chỉ hiện tổ chức đã chọn
     return org_id === orgStore.selected_org_id
   }
+
+  /**đọc danh sách nhóm */
+  async readGroup(): Promise<void> {
+    /** danh sách các tổ chức */
+    const LIST_ORG = orgStore.list_org || []
+    /** Lấy list org id */
+    const ORG_IDS = LIST_ORG.map(item => item.org_id || '')
+    if (isEmpty(ORG_IDS)) return
+    /** toàn bộ nhóm từ server */
+    // const RES = await new BillingAppGroup().readGroup($props.org_id)
+    const RES = await new BillingAppGroup().readAllGroup(ORG_IDS)
+
+    /** Lưu list vào store */
+    orgStore.list_group = RES
+    // lưu lại vào reactive để hiển thị
+    // groups.value = RES
+    // nextTick(() => {
+    //   // nếu là group duy nhất và là tk nhân viên thì chọn group đó luôn
+    //   if (is_single_group.value) {
+    //     selected_group_id.value = access_groups.value?.[0]?.group_id || ''
+    //   }
+    //   // tính toán lại độ rộng các nhóm
+    //   group_widths.value = measureAllGroupWidths()
+    //   // cập nhật lại các nhóm hiển thị
+    //   updateGroups()
+    //   // lặp qua các nhóm lưu lại ánh xạ id của từng page với id nhóm của page đó
+    //   // RES?.forEach(group => {
+    //   //   group?.group_pages?.forEach(page_id => {
+    //   //     // nếu không có id page hoặc id nhóm thì thôi
+    //   //     if (!page_id || !group?.group_id || !group?.org_id) return
+    //   //     // lưu ánh xạ từ id page tới id nhóm
+    //   //     pageManagerStore.pape_to_group_map[page_id] = [
+    //   //       ...(pageManagerStore.pape_to_group_map[page_id] || []),
+    //   //       group?.group_id,
+    //   //     ]
+    //   //   })
+    //   // })
+    // })
+  }
 }
 const $main = new Main()
+
+// lấy danh sách nhóm khi thành phần được khởi tạo
+// onMounted(async () => {
+//   await $main.readGroup()
+//   // nextTick(() => {
+//   //   // Lắng nghe resize
+//   //   window.addEventListener('resize', updateGroups)
+//   // })
+// })
+
+watch(
+  () => orgStore.list_org,
+  list => {
+    if (list && list.length) {
+      $main.readGroup()
+    }
+  },
+  { immediate: true } // chạy luôn khi component mount
+)
 
 // cung cấp hàm xử lý khi chọn trang
 provide(KEY_ADVANCE_SELECT_AGE_FUNCT, $main.triggerSelectPage)

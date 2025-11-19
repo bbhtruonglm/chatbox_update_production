@@ -93,18 +93,21 @@ export function usePageManager() {
 
       /**toàn bộ các trang của người dùng */
       const PAGE_DATA = await new N4SerivceAppPage().getListPage({})
-      const PAGE_DATA_2 = await new N4SerivceAppPage().getListActivePage({})
-
-      console.log(PAGE_DATA_2, 'page data 2')
+      // const PAGE_DATA_2 = await new N4SerivceAppPage().getListActivePage({})
+      // console.log(PAGE_DATA, 'page data')
+      // console.log(PAGE_DATA_2, 'page data 2')
 
       // nếu không có dữ liệu trang thì thôi
       if (!PAGE_DATA?.page_list) return
+      // if (!PAGE_DATA_2) return
 
       // lưu trữ dữ liệu trang
       pageStore.all_page_list = PAGE_DATA?.page_list
+      // pageStore.all_page_list = PAGE_DATA_2
 
       // lấy dữ liệu mapping tổ chức và trang
       pageStore.map_orgs = await read_link_org(keys(pageStore.all_page_list))
+      // pageStore.map_orgs = await read_link_org(keys(PAGE_DATA_2))
     }
     /**ẩn hiện dropdown */
     toggleDropdown(

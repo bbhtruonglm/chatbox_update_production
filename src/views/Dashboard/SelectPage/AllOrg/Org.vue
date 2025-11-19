@@ -61,7 +61,7 @@ import {
 } from '@/stores'
 import { usePageManager } from '@/views/Dashboard/composables/usePageManager'
 import { filter, pickBy, size } from 'lodash'
-import { computed, onMounted, watch } from 'vue'
+import { computed, nextTick, onMounted, watch } from 'vue'
 
 import CardItem from '@/components/Main/Dashboard/CardItem.vue'
 import Group from '@/views/Dashboard/SelectPage/AllOrg/Org/Group.vue'
@@ -71,6 +71,7 @@ import OrgTitleAction from '@/views/Dashboard/SelectPage/AllOrg/Org/OrgTitleActi
 import BriefCaseIcon from '@/components/Icons/BriefCase.vue'
 
 import type { PageData } from '@/service/interface/app/page'
+import { BillingAppGroup } from '@/utils/api/Billing'
 
 const $props = withDefaults(
   defineProps<{

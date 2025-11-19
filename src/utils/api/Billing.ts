@@ -264,10 +264,10 @@ export interface IWebhookHistory {
 @singleton()
 export class BillingAppWebhook extends Billing {
   constructor() {
-    // gọi API
+    /** gọi API */
     super(`app/webhook`)
 
-    // tự động nạp id tổ chức đang chọn
+    /** tự động nạp id tổ chức đang chọn */
     this.initSelectedOrgId()
   }
 
