@@ -118,6 +118,7 @@ class Main {
 
   /** đếm số page của tổ chức hiện tại với nền tảng đang được lọc */
   countPage(): number {
+    // console.log('active_page_list', pageStore.active_page_list)
     /** các page của tổ chức hiện tại */
     const PAGE_OF_THIS_ORG = filter(pageStore.active_page_list, page =>
       this.isInCurrentOrg(page)

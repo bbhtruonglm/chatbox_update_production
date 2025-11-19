@@ -1,5 +1,5 @@
 import type { PageData, PageList } from '@/service/interface/app/page'
-import { keys, map, pickBy, size } from 'lodash'
+import { isEmpty, keys, map, pickBy, size } from 'lodash'
 import {
   useOrgStore,
   usePageManagerStore,
@@ -14,6 +14,7 @@ import { Toast } from '@/utils/helper/Alert/Toast'
 import { container } from 'tsyringe'
 import { error } from '@/utils/decorator/Error'
 import { loading } from '@/utils/decorator/Loading'
+import { mapValues } from 'lodash'
 import { nextTick } from 'async'
 import { nonAccentVn } from '@/service/helper/format'
 import { preGoToChat } from '@/service/function'
@@ -92,22 +93,26 @@ export function usePageManager() {
       pageStore.all_page_list = {}
 
       /**toàn bộ các trang của người dùng */
-      const PAGE_DATA = await new N4SerivceAppPage().getListPage({})
-      // const PAGE_DATA_2 = await new N4SerivceAppPage().getListActivePage({})
-      // console.log(PAGE_DATA, 'page data')
-      // console.log(PAGE_DATA_2, 'page data 2')
+
+      const PAGE_DATA_2 = await new N4SerivceAppPage().getListActivePage({})
 
       // nếu không có dữ liệu trang thì thôi
-      if (!PAGE_DATA?.page_list) return
-      // if (!PAGE_DATA_2) return
+      if (isEmpty(PAGE_DATA_2)) return
 
       // lưu trữ dữ liệu trang
-      pageStore.all_page_list = PAGE_DATA?.page_list
-      // pageStore.all_page_list = PAGE_DATA_2
+      // pageStore.all_page_list = PAGE_DATA?.page_list
+      pageStore.all_page_list = mapValues(PAGE_DATA_2, item => {
+        return {
+          group_admin_id: '', // mặc định
+          staff_list: {}, // mặc định
+          widget_list: [], // phải là mảng rỗng thay vì undefined
+          page: item || {}, // đảm bảo có object page
+        }
+      })
 
+      console.log(pageStore.all_page_list, 'all page lisst')
       // lấy dữ liệu mapping tổ chức và trang
       pageStore.map_orgs = await read_link_org(keys(pageStore.all_page_list))
-      // pageStore.map_orgs = await read_link_org(keys(PAGE_DATA_2))
     }
     /**ẩn hiện dropdown */
     toggleDropdown(

@@ -5,7 +5,10 @@
   >
     <SkeletonGroupPage v-if="selectPageStore.is_loading" />
     <template v-else>
-      <template v-for="org of sortBy(orgStore.list_org, 'org_info.org_name')">
+      <template
+        v-for="org of sortBy(orgStore.list_org, 'org_info.org_name')"
+        class="flex flex-col gap-2"
+      >
         <Org
           ref="org_refs"
           v-if="org?.org_id && $main.isVisibleOrg(org?.org_id)"
@@ -100,7 +103,9 @@ class Main {
   /** có hiện ui của tổ chức hay không */
   isVisibleOrg(org_id?: string) {
     /** nếu là chọn tất cả thì hiện */
-    console.log(orgStore.is_selected_all_org, ' hahah')
+    // console.log(orgStore.is_selected_all_org, ' hahah')
+
+    // console.log(orgStore.list_org, 'lisst orge')
     if (orgStore.is_selected_all_org) return true
     // chọn 1 tố tổ chức thì chỉ hiện tổ chức đã chọn
     return org_id === orgStore.selected_org_id
