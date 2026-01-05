@@ -103,7 +103,7 @@ function getPreviewLabel() {
 
 /**kiểm tra có hiển thị icon AI ko */
 function shouldShowAiIcon(source?: ConversationInfo) {
-  // kiểm tra trạng thái AI cơ bản
+  /** kiểm tra trạng thái AI cơ bản */
   const IS_ACTIVE =
     calcStatus?.(source) && getPageInfo(source?.fb_page_id)?.is_active_ai_agent
   // nếu không có trạng thái ai thì dừng
