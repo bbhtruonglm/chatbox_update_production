@@ -157,12 +157,18 @@
       </li>
       <li>
         {{ $t('Ngày tạo') }}:
-        {{
-          $date_handle.format(
-            conversationStore.select_conversation_post?.content?.created_time,
-            'dd/MM/yyyy'
-          )
-        }}
+        <span
+          v-if="
+            conversationStore.select_conversation_post?.content?.created_time
+          "
+        >
+          {{
+            $date_handle.format(
+              conversationStore.select_conversation_post?.content?.created_time,
+              'dd/MM/yyyy'
+            )
+          }}
+        </span>
       </li>
       <li>
         {{ $t('Người tạo') }}:
@@ -170,12 +176,18 @@
       </li>
       <li>
         {{ $t('Ngày cập nhật') }}:
-        {{
-          $date_handle.format(
-            conversationStore.select_conversation_post?.content?.updated_time,
-            'dd/MM/yyyy'
-          )
-        }}
+        <span
+          v-if="
+            conversationStore.select_conversation_post?.content?.updated_time
+          "
+        >
+          {{
+            $date_handle.format(
+              conversationStore.select_conversation_post?.content?.updated_time,
+              'dd/MM/yyyy'
+            )
+          }}
+        </span>
       </li>
 
       <!-- <li>
