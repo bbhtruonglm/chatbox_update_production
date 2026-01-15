@@ -3,12 +3,17 @@
     class="dashboard-header bg-white rounded-lg py-3 px-3 md:px-6 flex justify-between"
   >
     <button
+      type="button"
       @click="$router.push('/dashboard/select-page')"
       class="flex gap-3 items-center"
+      :aria-label="$t('v1.view.main.dashboard.nav.home')"
     >
       <img
         :src="commonStore.partner?.logo?.full"
-        class="h-8"
+        :alt="commonStore.partner?.name || 'Logo'"
+        width="120"
+        height="32"
+        class="h-8 w-auto"
       />
     </button>
     <div class="flex gap-3 md:gap-7 items-center">
@@ -18,11 +23,16 @@
         :back="237"
       />
       <button
+        type="button"
         @click="attach_ref?.toggleDropdown"
         v-tooltip.bottom="$t('v1.view.main.dashboard.nav.menu')"
         class="rounded-lg group"
+        :aria-label="$t('v1.view.main.dashboard.nav.menu')"
       >
-        <Squares2X2Icon class="w-7 h-7 m-auto group-hover:text-red-600" />
+        <Squares2X2Icon
+          class="w-7 h-7 m-auto group-hover:text-red-600"
+          aria-hidden="true"
+        />
       </button>
     </div>
     <Dropdown

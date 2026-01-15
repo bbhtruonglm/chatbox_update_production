@@ -14,6 +14,7 @@
           v-if="org?.org_id && $main.isVisibleOrg(org?.org_id)"
           :key="org?.org_id"
           :org_id="org?.org_id"
+          :org_info="org"
           v-model:active_page_list="active_pages_of_orgs[org?.org_id]"
         />
       </template>
@@ -54,8 +55,6 @@ const pageManagerStore = usePageManagerStore()
 
 /**danh sách page của từng tổ chức */
 const active_pages_of_orgs = ref<Record<string, PageData[]>>({})
-
-console.log(active_pages_of_orgs.value, 'active_pages_of_orgs')
 
 /** mảng các reference tới các component của từng tổ chức */
 const org_refs = ref<InstanceType<typeof Org>[]>([])
@@ -161,15 +160,16 @@ const $main = new Main()
 //   // })
 // })
 
-watch(
-  () => orgStore.list_org,
-  list => {
-    if (list && list.length) {
-      $main.readGroup()
-    }
-  },
-  { immediate: true } // chạy luôn khi component mount
-)
+// ĐÃ CHUYỂN SANG GỌI SONG SONG TRONG usePageManager.getALlOrgAndPage()
+// watch(
+//   () => orgStore.list_org,
+//   list => {
+//     if (list && list.length) {
+//       $main.readGroup()
+//     }
+//   },
+//   { immediate: true }
+// )
 
 // cung cấp hàm xử lý khi chọn trang
 provide(KEY_ADVANCE_SELECT_AGE_FUNCT, $main.triggerSelectPage)

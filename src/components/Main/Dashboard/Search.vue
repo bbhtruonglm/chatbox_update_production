@@ -5,11 +5,20 @@
       class="absolute top-1/2 -translate-y-1/2 left-3 w-5 h-5 pointer-events-none"
       src="@/assets/icons/search.svg"
       alt="Search icon"
+      aria-hidden="true"
     />
+    <label
+      for="dashboard-search"
+      class="sr-only"
+      >{{ placeholder }}
+    </label>
     <!-- Input tìm kiếm -->
     <input
+      id="dashboard-search"
       v-model="temp_input"
+      type="search"
       :placeholder="placeholder"
+      :aria-label="placeholder"
       class="w-full h-full rounded-full border border-gray-300 py-2 pl-10 pr-4 text-sm transition-all duration-200 placeholder:text-gray-400 hover:border-gray-400 focus:outline-none focus:border-orange-500"
     />
   </div>

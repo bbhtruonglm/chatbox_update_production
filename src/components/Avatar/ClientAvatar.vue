@@ -6,11 +6,13 @@
     v-if="avatar"
     :src="avatar"
     class="overflow-hidden bg-slate-200 rounded-oval"
+    :alt="conversation?.client_name || 'Avatar khách hàng'"
   />
   <div
     v-else-if="comment"
     :class="animate_pulse"
     class="overflow-hidden bg-slate-200 rounded-oval"
+    :alt="'Avatar khách hàng'"
   >
     <img
       @error="onImageError"
@@ -18,16 +20,18 @@
       loading="lazy"
       :src="$main.loadCommentFromAvatar()"
       class="w-full h-full"
+      :alt="'Avatar khách hàng'"
     />
   </div>
   <PageAvatar
     v-else-if="conversation?.conversation_type === 'POST'"
-    :page_info="conversationStore.getPageById(conversation?.fb_page_id || '')"
+    :page_info="conversationStore.getPage()"
   />
   <div
     v-else
     :class="animate_pulse"
     class="overflow-hidden bg-slate-200 rounded-oval"
+    :alt="conversation?.client_name || 'Avatar khách hàng'"
   >
     <div
       :style="{ background: letterToColorCode() }"
@@ -45,6 +49,7 @@
       v-if="conversation?.platform_type === 'FB_MESS'"
       :src="loadImageUrl()"
       class="w-full h-full"
+      :alt="conversation?.client_name || 'Avatar khách hàng'"
     />
     <img
       @error="onImageError"
@@ -53,6 +58,7 @@
       v-if="conversation?.platform_type === 'FB_INSTAGRAM'"
       :src="loadImageUrl(conversation?.platform_type)"
       class="w-full h-full"
+      :alt="conversation?.client_name || 'Avatar khách hàng'"
     />
     <img
       @error="onImageError"
@@ -61,6 +67,7 @@
       v-if="conversation?.platform_type === 'TIKTOK'"
       :src="loadImageUrl(conversation?.platform_type)"
       class="w-full h-full"
+      :alt="conversation?.client_name || 'Avatar khách hàng'"
     />
     <img
       @error="onImageError"
@@ -71,6 +78,7 @@
       "
       :src="conversation?.client_avatar"
       class="w-full h-full"
+      :alt="conversation?.client_name || 'Avatar khách hàng'"
     />
     <img
       @error="onImageError"
@@ -82,11 +90,13 @@
       "
       :src="conversation?.client_avatar"
       class="w-full h-full"
+      :alt="conversation?.client_name || 'Avatar khách hàng'"
     />
     <div
       v-else
       :style="{ background: letterToColorCode() }"
       class="w-full h-full flex justify-center items-center font-semibold text-white"
+      :alt="conversation?.client_name || 'Avatar khách hàng'"
     >
       {{ nameToLetter(conversation?.client_name || '') }}
     </div>

@@ -4,12 +4,14 @@
       v-if="page_info?.type === 'ZALO_PERSONAL'"
       loading="lazy"
       :src="loadImageUrl()"
+      :alt="page_info?.name || 'Avatar trang'"
       class="w-full h-full object-contain"
     />
     <img
       loading="lazy"
       v-else-if="page_info?.type === 'FB_INSTAGRAM'"
       :src="loadImageUrl()"
+      :alt="page_info?.name || 'Avatar trang'"
       @error="onImgError"
       class="w-full h-full"
     />
@@ -17,6 +19,7 @@
       loading="lazy"
       v-else-if="page_info?.type === 'TIKTOK'"
       :src="loadImageUrl()"
+      :alt="page_info?.name || 'Avatar trang'"
       @error="onImgError"
       class="w-full h-full"
     />
@@ -24,6 +27,7 @@
       v-else-if="page_info?.avatar"
       loading="lazy"
       :src="page_info?.avatar"
+      :alt="page_info?.name || 'Avatar trang'"
       @error="onImgError"
       class="w-full h-full object-contain"
     />
@@ -31,6 +35,7 @@
       loading="lazy"
       v-else-if="page_info?.type === 'FB_MESS'"
       :src="loadImageUrl()"
+      :alt="page_info?.name || 'Avatar trang'"
       @error="onImgError"
       class="w-full h-full"
     />
@@ -40,6 +45,7 @@
         v-if="page_info?.avatar"
         loading="lazy"
         :src="page_info?.avatar"
+        :alt="page_info?.name || 'Avatar trang'"
         @error="onImgError"
         class="w-full h-full"
       />
@@ -53,6 +59,7 @@
       loading="lazy"
       v-else-if="page_info?.type === 'ZALO_OA'"
       :src="page_info?.avatar || zaloSvg"
+      :alt="page_info?.name || 'Avatar Zalo OA'"
       class="w-full h-full"
       @error="onImgError"
     />

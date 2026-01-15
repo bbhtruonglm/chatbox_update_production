@@ -17,7 +17,6 @@
       <!-- Input / Textarea -->
       <div>
         <textarea
-          ref="textarea_ref"
           v-if="is_expanded"
           v-model="description"
           rows="6"
@@ -29,7 +28,7 @@
           v-else
           type="text"
           v-model="description"
-          @focus="expandAndFocus"
+          @focus="is_expanded = true"
           class="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
           placeholder="Nhập nội dung để huấn luyện AI tư vấn khách hàng"
         />
