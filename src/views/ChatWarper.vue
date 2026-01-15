@@ -33,7 +33,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { read_os } from '@/service/api/chatbox/billing'
+import { read_os, read_org } from '@/service/api/chatbox/billing'
 import { update_info_conversation } from '@/service/api/chatbox/n4-service'
 import { create_token_app_installed } from '@/service/api/chatbox/n5-app'
 import {
@@ -651,11 +651,16 @@ class Main {
       //   SELECTED_PAGE_IDS,
       //   true
       // )
-      const PAGES = await new N4SerivceAppPage().getPageDetails(
-        orgStore.selected_org_id,
-        SELECTED_PAGE_IDS,
-        true
-      )
+      let PAGES
+      try {
+        PAGES = await new N4SerivceAppPage().getPageDetails(
+          orgStore.selected_org_id,
+          SELECTED_PAGE_IDS,
+          true
+        )
+      } catch (e) {
+        if (!PAGES) throw $t('v1.view.main.dashboard.chat.error.get_page_info')
+      }
 
       // nếu không có dữ liệu trang nào thì thôi
       if (!PAGES) throw $t('v1.view.main.dashboard.chat.error.get_page_info')
