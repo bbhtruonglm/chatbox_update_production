@@ -117,14 +117,14 @@ function getWidget() {
 
             widget_list.value = r
             cb()
-          }
+          },
         ),
     ],
     e => {
       widgetStore.is_loading = false
 
       if (e) return toastError(e)
-    }
+    },
   )
 }
 /**lấy danh sách widget khi thay đổi giá trị tìm kiếm */

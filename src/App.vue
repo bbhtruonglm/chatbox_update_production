@@ -17,22 +17,22 @@
 </template>
 
 <script setup lang="ts">
-import { useCommonStore } from '@/stores'
+import { useCommonStore, useOrgStore } from '@/stores'
+import { useKeyboardShortcut } from '@/views/composables/useKeyboardShortcut'
+import { container } from 'tsyringe'
+import { onMounted } from 'vue'
+import { setItem } from './service/helper/localStorage'
+import { N4SerivcePublicPartner } from './utils/api/N4Service/Partner'
+import { error } from './utils/decorator/Error'
+import { Toast } from './utils/helper/Alert/Toast'
+import { QueryString, type IQueryString } from './utils/helper/QueryString'
 
 import Loading from '@/components/Loading.vue'
-import Network from './components/Network.vue'
 import AdBlocker from './components/AdBlocker.vue'
-import { onMounted } from 'vue'
-import { Toast } from './utils/helper/Alert/Toast'
-import { N4SerivcePublicPartner } from './utils/api/N4Service/Partner'
-import { setItem } from './service/helper/localStorage'
-import { error } from './utils/decorator/Error'
-import { container } from 'tsyringe'
-import { QueryString, type IQueryString } from './utils/helper/QueryString'
-import { useKeyboardShortcut } from '@/views/composables/useKeyboardShortcut'
-import { confirm } from './service/helper/alert'
+import Network from './components/Network.vue'
 
 const commonStore = useCommonStore()
+const orgStore = useOrgStore()
 const $toast = container.resolve(Toast)
 
 useKeyboardShortcut()
@@ -82,6 +82,9 @@ class Main {
 
     // lưu ref vào local storage
     setItem('selected_org_id', ORG_ID)
+
+    // lưu lại selected_org_id vào store vì trước đó store đang lấy từ local cần phải ghi đè lại
+    orgStore.selected_org_id = ORG_ID
   }
   /**ghi đè lại token lấy từ param, phục vụ cho trường hợp mở từ app mobile */
   getParamToken() {
@@ -108,52 +111,8 @@ class Main {
     // thay đổi title
     document.title = commonStore.partner?.name || ''
 
-    // cập nhật meta tags cho SEO
-    $main.updateMetaTags()
-
     // thay đổi favicon
     $main.setFavicon()
-  }
-  /** Cập nhật động các meta tags SEO */
-  updateMetaTags() {
-    /** Tên partner */
-    const PARTNER_NAME = commonStore.partner?.name || ''
-    /** Description động */
-    const DESCRIPTION = `${PARTNER_NAME} - Nền tảng quản lý tin nhắn, chăm sóc khách hàng đa kênh. Hỗ trợ Facebook, Zalo, và nhiều kênh khác.`
-
-    // Cập nhật meta description
-    const metaDesc = document.querySelector('meta[name="description"]')
-    if (metaDesc) metaDesc.setAttribute('content', DESCRIPTION)
-
-    // Cập nhật OG title
-    const ogTitle = document.querySelector('meta[property="og:title"]')
-    if (ogTitle) ogTitle.setAttribute('content', PARTNER_NAME)
-
-    // Cập nhật OG description
-    const ogDesc = document.querySelector('meta[property="og:description"]')
-    if (ogDesc) ogDesc.setAttribute('content', DESCRIPTION)
-
-    // Cập nhật Twitter title
-    const twitterTitle = document.querySelector('meta[name="twitter:title"]')
-    if (twitterTitle) twitterTitle.setAttribute('content', PARTNER_NAME)
-
-    // Cập nhật Twitter description
-    const twitterDesc = document.querySelector(
-      'meta[name="twitter:description"]'
-    )
-    if (twitterDesc) twitterDesc.setAttribute('content', DESCRIPTION)
-
-    // Cập nhật OG image nếu có logo
-    if (commonStore.partner?.logo?.full) {
-      /** OG Image tag */
-      let ogImage = document.querySelector('meta[property="og:image"]')
-      if (!ogImage) {
-        ogImage = document.createElement('meta')
-        ogImage.setAttribute('property', 'og:image')
-        document.head.appendChild(ogImage)
-      }
-      ogImage.setAttribute('content', commonStore.partner.logo.full)
-    }
   }
   /**Thay đổi favicon */
   setFavicon() {

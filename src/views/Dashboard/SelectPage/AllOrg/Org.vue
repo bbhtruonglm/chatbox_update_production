@@ -17,21 +17,12 @@
       <div class="sticky top-0 pt-3">
         <img
           v-if="
-            org_info?.org_info?.org_avatar ||
             pageStore.map_orgs?.map_org_info?.[org_id]?.org_info?.org_avatar
           "
           :src="
-            org_info?.org_info?.org_avatar ||
             pageStore.map_orgs?.map_org_info?.[org_id]?.org_info?.org_avatar
           "
-          :alt="
-            org_info?.org_info?.org_name ||
-            pageStore.map_orgs?.map_org_info?.[org_id]?.org_info?.org_name ||
-            'Logo tổ chức'
-          "
           class="w-5 h-5 rounded-oval"
-          width="20"
-          height="20"
         />
         <BriefCaseIcon
           v-else
@@ -41,10 +32,7 @@
     </template>
     <template #title>
       <div class="flex-shrink-0">
-        {{
-          org_info?.org_info?.org_name ||
-          pageStore.map_orgs?.map_org_info?.[org_id]?.org_info?.org_name
-        }}
+        {{ pageStore.map_orgs?.map_org_info?.[org_id]?.org_info?.org_name }}
       </div>
       <Group :org_id />
     </template>
@@ -83,14 +71,11 @@ import OrgTitleAction from '@/views/Dashboard/SelectPage/AllOrg/Org/OrgTitleActi
 import BriefCaseIcon from '@/components/Icons/BriefCase.vue'
 
 import type { PageData } from '@/service/interface/app/page'
-import type { OrgInfo } from '@/service/interface/app/billing'
 
 const $props = withDefaults(
   defineProps<{
     /** id tổ chức */
     org_id: string
-    /** thông tin tổ chức */
-    org_info?: OrgInfo
   }>(),
   {}
 )
@@ -116,10 +101,10 @@ const page_of_current_org = computed(() => {
 
 /** danh sách sau khi đã lọc theo nhóm */
 const filter_page_list = computed(() => {
-  console.log(page_of_current_org.value, 'page_of_current_org')
-  console.log(pageManagerStore.pape_to_group_map, 'pape_to_group_map')
-  console.log(pageStore.map_orgs?.map_page_org || {}, 'map_page_org')
-  console.log(orgStore.selected_org_group, 'selected_org_group')
+  // console.log(page_of_current_org.value, 'page_of_current_org')
+  // console.log(pageManagerStore.pape_to_group_map, 'pape_to_group_map')
+  // console.log(pageStore.map_orgs?.map_page_org || {}, 'map_page_org')
+  // console.log(orgStore.selected_org_group, 'selected_org_group')
   return filterPageByGroup(
     page_of_current_org.value,
     pageManagerStore.pape_to_group_map,
@@ -131,7 +116,7 @@ const filter_page_list = computed(() => {
 class Main {
   /**sắp xếp page gắn sao lên đầu */
   getListPage() {
-    console.log(filter_page_list.value, 'filter_page_list')
+    // console.log(filter_page_list.value, 'filter_page_list')
     // console.log(filter_page_list.value, 'filter_page_list')
     // lọc ra các page thuộc về nhóm này
     active_page_list.value = sortListPage(filter_page_list.value)

@@ -1,7 +1,9 @@
 <template>
+  <SkeletonLoading v-if="is_loading" />
   <div
+    v-else
     id="chat__right-bar"
-    class="w-[400px] h-full flex-shrink-0 overflow-y-auto flex flex-col gap-2"
+    class="w-full h-full flex-shrink-0 overflow-y-auto flex flex-col gap-2"
   >
     <PostRightBar
       v-if="conversationStore.select_conversation?.conversation_type === 'POST'"
@@ -298,10 +300,6 @@ async function getListWidget() {
 
         return
       }
-      console.log(
-        conversationStore.select_conversation,
-        'conversationStore.select_conversation'
-      )
 
       // nếu widget là dạng post mess mới thì không reload iframe nữa mà gửi sự kiện đến iframe
       sendEventToIframe(widget, {
