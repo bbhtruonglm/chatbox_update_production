@@ -518,7 +518,7 @@ const search_text = ref('')
  * @returns {Promise<void>} Không trả về giá trị, chỉ cập nhật `file_list`.
  */
 const fetchAlbums = async (query: string): Promise<void> => {
-  /** Kiểm tra có từ khóa tìm kiếm không */
+  // Kiểm tra có từ khóa tìm kiếm không 
   if (query) {
     /** Lọc danh sách file theo tên, chuyển về lowercase để so sánh không phân biệt hoa thường */
     const DATA = file_list_root.value?.filter(item =>
